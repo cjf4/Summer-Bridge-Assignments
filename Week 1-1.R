@@ -17,9 +17,18 @@ nvect <- seq(20,50,5)
 #     quadratic equation:
 
 quadratic_e <- function(a, b, c){
-  root_of_d <- sqrt((b^2 - 4 * a * c))
-  root_1 <- (-1 * b + root_of_d)/2*a
-  root_2 <- (-1 * b - root_of_d)/2*a
-  return(c(root_1,root_2))
+  discriminant <- b^2 - 4 * a * c
+  if(discriminant < 0 ){
+      print("No real roots exist")
+  } 
+  else if(discriminant == 0){
+      root_1 <- (-1 * b + sqrt(discriminant))/2*a    
+      return(root_1)
+  }  
+  else {
+      root_1 <- (-1 * b + sqrt(discriminant))/2*a
+      root_2 <- (-1 * b - sqrt(discriminant))/2*a
+      return(c(root_1,root_2))
+  }
 }
 
