@@ -1,6 +1,4 @@
 library(XML)
-library(stringr)
-
 
 nfl_teams <- c("bills", "dolphins", "jets", "patriots",
                "browns", "steelers", "bengals", "ravens",
@@ -31,7 +29,6 @@ download_data <- function(team, year, df) {
     return(rbind(df, team_sals))
 }
 
-#getting error, put try catch on rbind right above
 for (i in 1:32) {
   for ( j in 1:8) {
     salary_data <- download_data(nfl_teams[i], years[j], salary_data)
@@ -40,7 +37,7 @@ for (i in 1:32) {
 
 
 #next steps
-#loop through url to download all teams/seasons
+#DONE loop through url to download all teams/seasons
 #set up database
 #connect to it
 #dump data into DB
