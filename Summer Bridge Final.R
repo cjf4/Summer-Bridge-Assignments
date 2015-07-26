@@ -1,4 +1,5 @@
 library(XML)
+library(plyr)
 
 nfl_teams <- c("bills", "dolphins", "jets", "patriots",
                "browns", "steelers", "bengals", "ravens",
@@ -26,6 +27,9 @@ download_data <- function(team, year, df) {
     team_sals$'CAP VALUE' <- as.numeric(gsub("[^[:digit:]]", "", team_sals$'CAP VALUE'))
     team_sals$'SALARY' <- as.numeric(gsub("[^[:digit:]]", "", team_sals$'SALARY'))
     
+    team_sals$TEAM_NAME <- rep(team, nrow(team_sals))
+    team_sals$YEAR <- rep(year, nrow(team_sals))
+    
     return(rbind(df, team_sals))
 }
 
@@ -35,9 +39,7 @@ for (i in 1:32) {
   }
 }
 
+salary_data$YEAR <- mapvalues(salary_data$YEAR, from = "2009-10", to = "2009")
 
-#next steps
-#DONE loop through url to download all teams/seasons
-#set up database
-#connect to it
-#dump data into DB
+write.csv(salary_data, file="salary_data.csv", row.names=FALSE, na = "")
+
