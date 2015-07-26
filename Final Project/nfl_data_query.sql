@@ -1,4 +1,5 @@
-SELECT  sum("CAP VALUE") AS "TotalCap",
+COPY
+    (SELECT  sum("CAP VALUE") AS "TotalCap",
     team_name,
     year,
     SUM(CASE WHEN POSITION = 'Quarterback' THEN "CAP VALUE" ELSE 0 END) AS "QB Cost",
@@ -48,4 +49,7 @@ GROUP BY team_name,
      seasons."TO Dif Rank",
      seasons."Pt Dif Rank",
      seasons."Yd Dif Rank"
-ORDER BY year DESC;
+ORDER BY year DESC;)
+TO '/Users/christopherfenton/Data Science/Summer Bridge/summer-bridge-assignments/final project/salary_season.csv'
+WITH CSV HEADER;
+
