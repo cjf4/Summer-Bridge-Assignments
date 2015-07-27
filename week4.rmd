@@ -1,0 +1,6 @@
+produc <- read.csv("produc.csv")
+
+bama <- subset(produc, state=='ALABAMA')
+hist(bama$unemp)
+
+plot(bama$year, bama$unemp)
