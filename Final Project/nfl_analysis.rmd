@@ -1,0 +1,124 @@
+# Chris Fenton Summer Bridge Final Project
+## Part II: NFL Data Analysis
+
+[Github Repo](https://github.com/cjf4/Summer-Bridge-Assignments/tree/master/Final%20Project)
+
+First, I loaded the .csv file [I prepared earlier](http://rpubs.com/cjf4/97449).
+
+```{r}
+library(ggplot2)
+
+nfl <- read.csv('salary_season.csv', stringsAsFactors=FALSE)
+```
+
+There's still a little bit more wrangling I want to do before I start doing explatory data analysis. It turned out the data from USA Today had a few more problems than I initially realized.
+
+### Will, Mike, Sam, or Jack?
+
+The first problem was somewhat easy to overcome. The salary data sometimes listed a player as linebacker, sometimes as an outside linebacker, and sometimes as a middle linbacker. 
+
+This is actually a classification problem that is common to NFL data due to the different roles a linebacker can play depending on the scheme. Some linebackers almost always cover receivers on passing downs, where as others (especially in a 3-4 scheme) do nothing but rush the quarterback. 
+
+For simplicity's sake, I chose to ignore those differences and simply combine all these vectors into a single total linebacker vector.
+
+```{r}
+total_lbs <- nfl[,'LB.Cost'] + nfl[,'OLB.Cost'] + nfl[,'MLB.Cost']
+nfl <- cbind(nfl, tLB.Cost = total_lbs)
+```
+### Linemen are people too, but someone forgot to tell the USA Today
+
+The next problem was quite a bit more serious, and required me to adjust my approach. When writing my sql query to create the CSV file, I noticed something odd. The Jacksonville Jaguars apparently did not have any offensive linemen on payroll in 2009.
+
+As much as that may make sense to a football fan who's familiar with the Jaguars, further inspection revealed that only 2005 for any team included any offensive linemen. My original plan was to measure each team's proportion of total salary allocated to each position group. But with offensive line data most missing, this wouldn't be accurate at all.
+
+To still salvage something of value, I decided to tighten my scope on what I did have, which were salaries for all the defensive players (I double checked to see if safeties were in there because fool me twice...).
+
+So I added up all the vectors for defensive position groups to come up with a column in the data frame that had the total amount a team spent on defense in a given year:
+```{r}
+total_d <- nfl[,'tLB.Cost'] + nfl[,'DE.Cost'] + nfl[,'DT.Cost'] 
+                            + nfl[,'CB.Cost'] + nfl[,'S.Cost']
+nfl <- cbind(nfl, tD.Cost = total_d)
+```
+
+### It's all relative
+
+Here I simply took my position group totals from earlier and determined the ratio of total defensive money spent.
+```{r}
+lb_pct <- nfl[,'tLB.Cost'] / nfl[,'tD.Cost']  
+dt_pct <- nfl[,'DT.Cost'] / nfl[,'tD.Cost']  
+de_pct <- nfl[,'DE.Cost'] / nfl[,'tD.Cost']  
+cb_pct <- nfl[,'CB.Cost'] / nfl[,'tD.Cost']  
+s_pct <- nfl[,'S.Cost'] / nfl[,'tD.Cost']  
+
+nfl <- cbind(nfl, lb_pct, dt_pct, de_pct, cb_pct, s_pct)
+```
+
+And before I started running any analysis, I cut the data down to a smaller frame that only included the propotion numbers and the performance data that could be impacted by defense peformance.
+```{r}
+def <- subset(nfl,select=c("team_name",
+                           "year",
+                           "Wins",
+                           "Points.Against",
+                           "Def.Rank.Pts",
+                           "Def.Rank.Yds",
+                           "lb_pct",
+                           "dt_pct",
+                           "de_pct",
+                           "cb_pct",
+                           "s_pct"))
+```
+
+### Yards or Points?
+
+First, I just wanted to see if NFL tradition of ranking NFL defenses by yards allowed was really a better measure than points against.
+
+Here's the plot by yards ranking:
+```{r}
+plot(def$'Def.Rank.Yds', def$'Wins', main ="Defensive Ranking by Yards Versus Wins", xlab="Defensive Ranking by Yards Allowed", ylab="Wins")
+```
+And the plot for points ranking:
+```{r}
+plot(def$'Def.Rank.Pts', def$'Wins', main ="Defensive Ranking by Points Versus Wins", xlab="Defensive Ranking by Points Allowed", ylab="Wins")
+```
+
+Looked to me like ranking by points is a better indicator. I checked out the correlations to confirm this:
+
+```{r}
+cor(def$'Def.Rank.Yds', def$Wins)
+cor(def$'Def.Rank.Pts', def$Wins)
+```
+Sure enough, the correlation to wins is considerably stronger for points allowed than it is yards (the correlations are negative because the rankings are inverted, ie 1 is the best, 32 is the worst).
+
+However, in order to totally accept this conclusion, I would need to confirm that the "Points Allowed" data provided by Pro Football Reference only included points actually given up by the defense (as opposed to special teams touchdowns or pick sixes, which increase a team's total points allowed but not that of the defense). 
+
+### How do teams allocate their defensive budgets?
+
+I was also generally curious how teams split up their defense budgets. This was very easy to see using the summary() function:
+
+```{r}
+summary(def[,7:11])
+```
+
+I also wanted a visualization of what kind of variability existed for each position group:
+
+```{r}
+ggplot(data = def) +geom_histogram(aes(x = lb_pct))
+ggplot(data = def) +geom_histogram(aes(x = dt_pct))
+ggplot(data = def) +geom_histogram(aes(x = de_pct))
+ggplot(data = def) +geom_histogram(aes(x = cb_pct))
+ggplot(data = def) +geom_histogram(aes(x = s_pct))
+```
+
+With the graphs, it's a bit easier to see what's going on. Most striking to me is the variance that exists within the defensive end grouping. The interquartile range is the largest of the 5 position groups measured.
+
+### K-Nearest Neighbors Algorithm
+When I originally set out with this project, I wanted to use the "K-Nearest Neighbors" algorithm to detect patterns in the way general managers (the person in charge of acquiring players) structure their teams, and to see how those patterns compared in terms of success (wins and playoff appearances).
+
+My understanding, which is very much nascent at this point, is you begin with a multi dimensional matrix, and choose a "K" number of features to define a record. You than pick an aribitrary number of points that will eventually define your patterns. Finally, the algorithm creates a vector for each point that attempts to guess points that will be the closest to grouping of vectors, using euclidian distance. It continues to guess, using past performance to improve it's guesses, until a satisfactorily small distance is achieved for all the vectors.
+
+My strategy to implement this using NFL data would be to use the 5 position group budget allocation percentages and wins as vector elements, and use maybe 3 or 4 nearest neighbor points to look for
+
+My thoughts as to why this would be a good fit for salary data is that the K-Features are already all percentages, thus avoiding the scaling problems that the K-Nearest Neighbors can be prone to. 
+
+Also, if successful, it would be easy to measure the success of each  of each nearest neighbor point, as they would all have different win values. Than, you would have a template you could conceivably give back to a general manager and say "This pattern is much more associated with success than the others."
+
