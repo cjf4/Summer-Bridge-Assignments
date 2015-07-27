@@ -45,5 +45,5 @@ CREATE TABLE season(
     "DSRS" numeric
 );
 
-COPY salaries FROM '/Users/christopherfenton/Data Science/Summer Bridge/salary_data.csv' CSV HEADER
-COPY seasons FROM '/Users/christopherfenton/Data Science/Summer Bridge/team_years.csv' CSV HEADER
+COPY salaries FROM '/Users/christopherfenton/Data Science/Summer Bridge/summer-bridge-assignments/final project/salary_data.csv' CSV HEADER
+COPY seasons FROM '/Users/christopherfenton/Data Science/Summer Bridge/summer-bridge-assignments/final project/team_years.csv' CSV HEADER
