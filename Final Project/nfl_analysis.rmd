@@ -111,14 +111,14 @@ ggplot(data = def) +geom_histogram(aes(x = s_pct))
 
 With the graphs, it's a bit easier to see what's going on. Most striking to me is the variance that exists within the defensive end grouping. The interquartile range is the largest of the 5 position groups measured.
 
-### K-Nearest Neighbors Algorithm
-When I originally set out with this project, I wanted to use the "K-Nearest Neighbors" algorithm to detect patterns in the way general managers (the person in charge of acquiring players) structure their teams, and to see how those patterns compared in terms of success (wins and playoff appearances).
+### K-Means Clustering Algorithm
+When I originally set out with this project, I wanted to use the "K-Means Clustering" algorithm to detect patterns in the way general managers (the person in charge of acquiring players) structure their teams, and to see how those patterns compared in terms of success (wins and playoff appearances).
 
-My understanding, which is very much nascent at this point, is you begin with a multi dimensional matrix, and choose a "K" number of features to define a record. You than pick an aribitrary number of points that will eventually define your patterns. Finally, the algorithm creates a vector for each point that attempts to guess points that will be the closest to grouping of vectors, using euclidian distance. It continues to guess, using past performance to improve it's guesses, until a satisfactorily small distance is achieved for all the vectors.
+My understanding (which is very much nascent at this point) is you begin with a multi dimensional matrix, and choose a "K" number of clusters to establish your means. You than pick an aribitrary number of points that will eventually define your patterns. Finally, the algorithm creates a vector for each point that attempts to guess points that will be the closest to grouping of vectors, using euclidian distance. It continues to guess, using past performance to improve it's guesses, until a satisfactorily small distance is achieved for all the vectors.
 
 My strategy to implement this using NFL data would be to use the 5 position group budget allocation percentages and wins as vector elements, and use maybe 3 or 4 nearest neighbor points to look for
 
-My thoughts as to why this would be a good fit for salary data is that the K-Features are already all percentages, thus avoiding the scaling problems that the K-Nearest Neighbors can be prone to. 
+My thoughts as to why this would be a good fit for salary data is that the K-Means are already all percentages, thus avoiding the scaling problems that the K-Means can be prone to. 
 
-Also, if successful, it would be easy to measure the success of each  of each nearest neighbor point, as they would all have different win values. Than, you would have a template you could conceivably give back to a general manager and say "This pattern is much more associated with success than the others."
+Also, if successful, it would be easy to measure the success of each  of each nearest cluster point, as they would all have different win values. Than, you would have a template you could conceivably give back to a general manager and say "This pattern is much more associated with success than the others."
 
